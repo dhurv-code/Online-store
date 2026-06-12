@@ -50,6 +50,12 @@ export const ProductService = {
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
   },
 
+  async listAllProducts() {
+    const q = query(collection(db, COLLECTIONS.products), orderBy('createdAt', 'desc'))
+    const snapshot = await getDocs(q)
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+  },
+
   async listProductsByStore(storeId) {
     const q = query(collection(db, COLLECTIONS.products), where('storeId', '==', storeId), orderBy('createdAt', 'desc'))
     const snapshot = await getDocs(q)

@@ -1,0 +1,63 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isBuyer() {
+      return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'buyer';
+    }
+
+    function isSeller() {
+      return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'seller';
+    }
+
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    match /sellers/{sellerId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.auth.uid == sellerId;
+      allow update, delete: if isSignedIn() && (request.auth.uid == sellerId || isAdmin());
+    }
+
+    match /stores/{storeId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.sellerId == request.auth.uid;
+      allow update, delete: if isSignedIn() && (resource.data.sellerId == request.auth.uid || isAdmin());
+    }
+
+    match /products/{productId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.sellerId == request.auth.uid;
+      allow update, delete: if isSignedIn() && (resource.data.sellerId == request.auth.uid || isAdmin());
+    }
+
+    match /conversations/{conversationId} {
+      allow read: if isSignedIn() && (
+        request.auth.uid in resource.data.participants || isAdmin()
+      );
+      allow create: if isSignedIn() && request.resource.data.participants[request.auth.uid] == true;
+      allow update: if isSignedIn() && (
+        request.auth.uid in resource.data.participants || isAdmin()
+      );
+      allow delete: if false;
+    }
+
+    match /messages/{messageId} {
+      allow read: if isSignedIn() && (
+        resource.data.senderId == request.auth.uid || resource.data.recipientId == request.auth.uid || isAdmin()
+      );
+      allow create: if isSignedIn() && request.auth.uid == request.resource.data.senderId;
+      allow update, delete: if false;
+    }
+  }
+}

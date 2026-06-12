@@ -73,8 +73,8 @@ function SellerDashboardPage() {
           <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-slate-900">Quick actions</h2>
             <div className="mt-4 flex flex-wrap gap-3">
-              <Button as="link" className="bg-brand-600" onClick={() => window.location.assign(ROUTES.addProduct)}>Add new product</Button>
-              <Button as="link" className="bg-slate-900" onClick={() => window.location.assign(ROUTES.sellerProducts)}>Manage products</Button>
+              <Link to={ROUTES.addProduct}><Button>Add new product</Button></Link>
+              <Link to={ROUTES.sellerProducts}><Button className="bg-slate-900">Manage products</Button></Link>
             </div>
           </div>
         </div>
