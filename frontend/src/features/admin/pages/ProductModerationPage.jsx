@@ -18,7 +18,7 @@ function ProductModerationPage() {
   useEffect(() => {
     async function load() {
       setLoading(true)
-      const allProducts = await ProductService.listApprovedProducts()
+      const allProducts = await ProductService.listAllProducts()
       setProducts(allProducts)
       setLoading(false)
     }
@@ -28,6 +28,11 @@ function ProductModerationPage() {
   async function handleDelete(productId) {
     await ProductService.deleteProduct(productId)
     setProducts(current => current.filter(product => product.id !== productId))
+  }
+
+  async function handleToggleApproval(productId, approved) {
+    await ProductService.updateProduct(productId, { approved: !approved })
+    setProducts(current => current.map(product => product.id === productId ? { ...product, approved: !approved } : product))
   }
 
   return (
@@ -45,12 +50,18 @@ function ProductModerationPage() {
                   <div>
                     <h2 className="text-lg font-semibold text-slate-900">{product.name}</h2>
                     <p className="text-sm text-slate-600">₹{product.price} • {product.category}</p>
+                    <p className="mt-1 text-sm text-slate-500">Status: {product.approved ? 'Approved' : 'Pending'}</p>
                   </div>
-                  <Button className="bg-red-500 hover:bg-red-600" onClick={() => handleDelete(product.id)}>Delete</Button>
+                  <div className="flex flex-wrap gap-3">
+                    <Button className={product.approved ? 'bg-orange-500 hover:bg-orange-600' : 'bg-green-600 hover:bg-green-700'} onClick={() => handleToggleApproval(product.id, product.approved)}>
+                      {product.approved ? 'Unapprove' : 'Approve'}
+                    </Button>
+                    <Button className="bg-red-500 hover:bg-red-600" onClick={() => handleDelete(product.id)}>Delete</Button>
+                  </div>
                 </div>
               ))}
             </div>
-          ) : <EmptyState title="No products" description="No approved products available for moderation." />}
+          ) : <EmptyState title="No products" description="No products available for moderation." />}
         </div>
       </div>
     </PageLayout>

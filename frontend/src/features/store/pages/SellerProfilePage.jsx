@@ -30,7 +30,7 @@ function SellerProfilePage() {
       setStore(storeProfile)
       if (storeProfile) {
         const storeProducts = await ProductService.listProductsByStore(storeProfile.id)
-        setProducts(storeProducts)
+        setProducts(storeProducts.filter(product => product.approved))
       }
       setLoading(false)
     }
